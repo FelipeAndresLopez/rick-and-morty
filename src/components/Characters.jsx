@@ -1,6 +1,10 @@
-import React, { useState, useReducer, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useReducer, useMemo, useRef, useCallback, useContext } from 'react';
 import { useCharacters } from '../hooks/useCharacters';
 import { SearchBox } from './SearchBox';
+import { ThemeContext } from '../context/ThemeContext';
+
+import '../styles/Characters.css';
+import { CharacterCard } from './CharacterCard';
 
 const API = 'https://rickandmortyapi.com/api/character/';
 
@@ -16,6 +20,13 @@ const favoriteReducer = (state, action) => {
         favorites: [...state.favorites, action.payload]
       }
 
+
+    case 'REMOVE_FROM_FAVORITE':
+      return {
+        ...state,
+        favorites: state.favorites.filter(favorite => favorite !== action.payload)
+      }
+
     default:
       return state;
   }
@@ -26,27 +37,25 @@ export const Characters = () => {
   const [favorites, dispatch] = useReducer(favoriteReducer, initialState);
   const [search, setSearch] = useState('');
   const searchInput = useRef(null);
-
+  const [theme] = useContext(ThemeContext);
   const characters = useCharacters(API);
 
   const handleClick = (favorite) => {
-    dispatch({ type: 'ADD_TO_FAVORITE', payload: favorite });
+    const existsCharacter = favorites.favorites.find(fav => fav === favorite);
+
+    if (!existsCharacter) {
+      dispatch({ type: 'ADD_TO_FAVORITE', payload: favorite });
+    }
   }
 
-  // const handleSearch = () => {
-  //   setSearch(searchInput.current.value);
-  // }
+  const handleSearch = useCallback(() => {
+    setSearch(searchInput.current.value)
+  }, []
+  );
 
-  // const filteredCharacters = characters.filter((character) => {
-  //   return character.name.toLowerCase().includes(search.toLowerCase());
-  // })
-
-  const handleSearch = useCallback(
-    () => {
-      setSearch(searchInput.current.value)
-    },
-    [],
-  )
+  const removeFromFavorites = (favorite) => {
+    dispatch({ type: 'REMOVE_FROM_FAVORITE', payload: favorite });
+  }
 
   const filteredCharacters = useMemo(() => (
     characters.filter((character) => {
@@ -54,23 +63,44 @@ export const Characters = () => {
     })
   ), [characters, search]);
 
+
+  const isDarkModeActive = theme.type === 'dark';
+
   return (
-    <div className="characters">
+    <div className={`characters ${isDarkModeActive ? 'dark-mode' : 'light-mode'}`}>
 
-      {favorites.favorites.map((favorite) => (
-        <li key={favorite.id}>
-          {favorite.name}
-        </li>
-      ))}
+      {favorites.favorites.length > 0 &&
+        <>
+          <h2 className="characters__subtitle">My Favorites</h2>
+          <div className="characters-container">
+            {favorites.favorites.map((favorite) => (
+              <CharacterCard
+                key={favorite.id}
+                character={favorite}
+                handleClick={removeFromFavorites}
+                buttonText='Remove from favorites'
+              />
+            ))}
+          </div>
+        </>
+      }
 
-      <SearchBox search={search} searchInput={searchInput} handleSearch={handleSearch} />
+      <section className="characters__section">
+        <h2 className="characters__subtitle">Characters</h2>
+        <SearchBox search={search} searchInput={searchInput} handleSearch={handleSearch} />
+      </section>
 
-      { filteredCharacters.map(character => (
-        <div key={character.id}>
-          <h2>{character.name}</h2>
-          <button type="button" onClick={() => handleClick(character)}>Add to favorites</button>
-        </div>
-      ))}
+
+      <div className="characters-container">
+        {filteredCharacters.map(character => (
+          <CharacterCard
+            key={character.id}
+            character={character}
+            handleClick={handleClick}
+            buttonText='Add to favorites'
+          />
+        ))}
+      </div>
     </div>
   );
 }

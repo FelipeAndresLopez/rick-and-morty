@@ -1,0 +1,27 @@
+.search-box {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.search-box input {
+  height: 30px;
+  border: none;
+  border-bottom: 2px solid #000;
+  color: #000;
+  background-color: rgba(255, 255, 255, 0);
+  background-image: url("../assets/black-loupe.png");
+  background-position: 0px 10px;
+  background-repeat: no-repeat;
+  padding-left: 20px;
+}
+
+.dark-mode input {
+  border-bottom: 2px solid #fff;
+  color: white;
+  background-image: url("../assets/white-loupe.png");
+}
+
+.search-box input:focus {
+  outline: none;
+}

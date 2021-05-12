@@ -1,18 +1,21 @@
-import React, { useState, useContext } from 'react';
-import { ThemeContext } from '../context/ThemeContext';
+import React, { useContext } from 'react';
+import { ThemeContext, themes } from '../context/ThemeContext';
+import '../styles/Header.css';
 
 export const Header = () => {
-  const [darkMode, setDarkMode] = useState(false);
-  const color = useContext(ThemeContext);
-
-  const handleClick = () => {
-    setDarkMode(!darkMode);
+  const [theme, setTheme] = useContext(ThemeContext);
+  const switchTheme = () => {
+    if (theme.type === 'dark') {
+      setTheme(themes.light);
+    } else {
+      setTheme(themes.dark);
+    }
   }
+  const isDarkModeActive = theme.type === 'dark';
   return (
-    <div className="header">
-      <h1 style={{ color: color }}>React Hooks</h1>
-      <button type="button" onClick={handleClick}>{darkMode ? 'Dark mode' : 'Light Mode'}</button>
-      <button type="button" onClick={() => setDarkMode(!darkMode)}>{darkMode ? 'Dark mode 2' : 'Light Mode 2'}</button>
-    </div>
+    <div className={`header ${isDarkModeActive ? 'dark-mode' : 'light-mode'}`}>
+      <h1>Rick & Morty</h1>
+      <button type="button" onClick={switchTheme}>{isDarkModeActive ? 'Dark mode' : 'Light Mode'}</button>
+    </div >
   );
 }
